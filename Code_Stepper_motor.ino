@@ -18,11 +18,11 @@ long xungtrenvong = 4; // so xung/vong
 float speedX = 60  ; // vong/phut
 int Step=0;
 int Speed;
-int Mode;
+int Mode=0;
 int read_ADC;
 int amount=0;
 int dem=0;
-
+int en=0;
 void setup()
 {
   Serial.begin(9600);
@@ -38,14 +38,26 @@ pinMode(in3, OUTPUT);
 pinMode(in4, OUTPUT); 
 
  lcd.begin(20,4);  
+ lcd.setCursor(0,0);
+ lcd.print("  Sp cua Nhom 17  ");
+   // Turn off the display:
+  lcd.noDisplay();
+  delay(500);
+  // Turn on the display:
+  lcd.display();
+  delay(500);
+ lcd.setCursor(0,1);
+ lcd.print("___Stepper.Motor__");
+ delay(1000);
+ lcd.clear();
 }
 
 void loop() {
   read_ADC=analogRead(potentiometer);
   speedX = map(read_ADC, 0, 1023, 20, 100); //vong/phut
   Speed = map(read_ADC, 0, 1023, 100, 0);
-
-//Mode=0; 
+ 
+//lcd.clear();
 
 if (digitalRead (bt_C) == 0) {
     amount = amount + 5;
@@ -54,7 +66,11 @@ if (digitalRead (bt_C) == 0) {
   }
     delay(500);
 if(digitalRead (bt_CW) == 0){Mode = 1;} //For Clockwise
-if(digitalRead (bt_S) == 0){Mode = 0;amount=0;} //For Stop
+if(digitalRead (bt_S) == 0){
+  if(en==0){en=1; }
+  else{en=0;amount=0;}
+ 
+  } //For Stop
 if(digitalRead (bt_ACW) == 0){Mode = 2;} //For Anticlockwise
 
  
@@ -68,42 +84,41 @@ else{lcd.setCursor(10, 0);
   lcd.print(speedX);}
 
 lcd.setCursor(0,1);{
-if(Mode==0){ lcd.print("      Stop      ");}
+
 if(Mode==1){ lcd.print("    Clockwise   ");}
 if(Mode==2){ lcd.print("  Anticlockwise ");}
 }
-
+lcd.setCursor(0,2);{
+  if(en==1){ lcd.print("      ON      ");}
+if(en==0){ lcd.print("      OFF      ");}
+}
   lcd.setCursor(0, 3);
   lcd.print("Count:"); lcd.setCursor(12, 3);
   lcd.print(amount);
 
   
- if((Mode>0)&&(amount>0)){
+ if((en==1)&&(amount>0)){
   moveX(amount, speedX);
  // delay(2000);
   }
 
 }
 
-
 void moveX(int tongvong, float speed_) {
 
   long stepsCount = 0;
 float period =   1000 / (speed_ / 60 ); //don vi mili giay
   long tongxung = tongvong * xungtrenvong;
-int dem;
-dem=0;
+int dem=0;
+delay(1000);
 while (stepsCount < tongxung) {
  
-
-
 stepsCount++;
 dem++;
- lcd.setCursor(8, 3);
+lcd.setCursor(8, 3);
 lcd.print(dem/4);
-if(digitalRead (bt_CW) == 0){Mode = 1;} //For Clockwise
-if(digitalRead (bt_ACW) == 0){Mode = 2;} //For Anticlockwise
-if(digitalRead (bt_S) ==0) {Mode=0; break;} // For Stop
+
+if(digitalRead (bt_S) ==0) {en=0; amount=0; break;} // For Stop
 
 if(Mode==1){  
 Step = Step+1;
@@ -119,7 +134,7 @@ call_Step(Step);// Quay nguoc chieu
   
  //  delay(2000);
 }
-  delay(1000);
+delay(1000);
 lcd.clear();
 
 }
