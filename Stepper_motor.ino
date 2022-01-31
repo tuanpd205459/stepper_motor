@@ -119,8 +119,9 @@ call_Step(Step);// Quay nguoc chieu
   
  //  delay(2000);
 }
+  delay(1000);
 lcd.clear();
-delay(1000);
+
 }
 
 
